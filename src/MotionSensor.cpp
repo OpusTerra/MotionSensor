@@ -58,20 +58,9 @@ bool MotionSensor::Setup(
     char buff[250];
     bool ret = true;
     
-    config.refresh_rate_milisecs = sensor_refresh_rate_milisecs;
-    config.motion_time_period_milisecs = sensor_motion_time_period_milisecs;
-    config.minimal_triggering_number = sensor_minimal_triggering_number;
-
-    is_OK = false; 
-
-    last_ValidDetection_time = 0L;
-    last_check_time = 0L;
-    sensor_trigger_count = 0;
-    motion_detected_count = 0;
-
-    if(sensor_minimal_triggering_number*sensor_refresh_rate_milisecs >sensor_motion_time_period_milisecs)
+	if(sensor_minimal_triggering_number*sensor_refresh_rate_milisecs >sensor_motion_time_period_milisecs)
     {
-      sprintf(buff,"\nWrong config.\nImpossible to reach minimal triggering number with these values: %d * %d (%d) > %d ",
+      sprintf(buff,"Wrong config Keeping previous values. Impossible to reach minimal triggering number with these values: %d * %d (%d) > %d ",
           sensor_minimal_triggering_number,
           sensor_refresh_rate_milisecs,
           sensor_minimal_triggering_number*sensor_refresh_rate_milisecs,
@@ -82,8 +71,22 @@ bool MotionSensor::Setup(
 		  if (Logger) 
            (*Logger)(buff, false);
 	   
-        ret= false;
+		  ret= false;
     }
+	else
+    {
+		config.refresh_rate_milisecs = sensor_refresh_rate_milisecs;
+		config.motion_time_period_milisecs = sensor_motion_time_period_milisecs;
+		config.minimal_triggering_number = sensor_minimal_triggering_number;
+
+		is_OK = false; 
+
+		last_ValidDetection_time = 0L;
+		last_check_time = 0L;
+		sensor_trigger_count = 0;
+		motion_detected_count = 0;
+			
+	}			
     return ret;
 }
 
@@ -118,6 +121,8 @@ void MotionSensor::loop(void)
   char buff[250]; // Buffer for storing log messages
 
   unsigned long time_difference;
+  
+  is_OK = false;
 
   // Calculate the time passed since the last check
   time_difference = millis() - last_check_time;
