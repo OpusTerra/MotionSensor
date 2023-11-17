@@ -1,4 +1,4 @@
-## pir-motion-sensor
+## PIR Motion Sensor 
 
 Arduino library to interact mainly with PIR motion sensors. This lib was tested mainly on cheap HC-SR501 motion sensor and ESP8266 based device.
 

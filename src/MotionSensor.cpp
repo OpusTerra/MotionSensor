@@ -1,11 +1,8 @@
 /**
- * MotionSensor is a simple and easy to use Arduino class for the implementation
- * of non-blocking timers, as it is far better to use non-blocking timers
- * with a micro-controller since they allow you to trigger code at defined
- * durations of time, without stopping the execution of your main loop.
+ * MotionSensor is a simple and easy to use Arduino class Arduino library to interact mainly with PIR motion sensors. This lib was tested mainly on cheap HC-SR501 motion sensor and ESP8266 based device.
  *
  * Written by - Denis Lambert
- * Full documentation can be found at:
+ * Full documentation can be found at: https://github.com/OpusTerra/MotionSensor
  *
  * See LICENSE file for acceptable use conditions - this is open source
  * and there are no restrictions on its usage, I simply ask for some acknowledgment
@@ -114,90 +111,99 @@ bool MotionSensor::ValidDetection(void)
     return false;   
 }
 
-void  MotionSensor::loop(void)
+// The most important chunk of code !
+void MotionSensor::loop(void)
 {
- 
-  char buff[250];
+  char buff[250]; // Buffer for storing log messages
 
   unsigned long time_difference;
 
+  // Calculate the time passed since the last check
   time_difference = millis() - last_check_time;
-  if (time_difference <=   config.refresh_rate_milisecs)
+
+  if (time_difference <= config.refresh_rate_milisecs)
   {
-        // Not enough time passed since last check
-        sprintf(buff, "Not enough time (%ld) passed since last check at %ld", time_difference, last_check_time ); 
-        // Serial.println(buff);
-        return ;
+    // Not enough time passed since the last check
+    sprintf(buff, "Not enough time (%ld) passed since last check at %ld", time_difference, last_check_time);
+    // Serial.println(buff);
+    return;
   }
-  
-  // Serial.println("Time to check for new detections");  
-  if(try_recv())
+
+  // Serial.println("Time to check for new detections");
+
+  // Check for new detections using try_recv()
+  if (try_recv())
   {
-      motion_detected_count++; // ssi PIN du PIR est à HIGH à ce moment là
-      if(motion_detected_count == 1)
-      {
-        sprintf(buff, "**New motion sequence** Resetting sensor_trigger_count: %d", sensor_trigger_count);                      
-        if (SerialVerbose) 
-          Serial.println(buff);
-        sensor_trigger_count = 0;  // on reset le sensor checker si on vient juste de commencer a avoir un mouvement
-      }
+    motion_detected_count++; // Increment motion detection count if the PIR PIN is HIGH
+
+    if (motion_detected_count == 1)
+    {
+      // New motion sequence started, reset sensor_trigger_count
+      sprintf(buff, "**New motion sequence** Resetting sensor_trigger_count: %d", sensor_trigger_count);
+      if (SerialVerbose)
+        Serial.println(buff);
+
+      sensor_trigger_count = 0; // Reset the sensor checker if a new movement sequence starts
+    }
   }
-    
+
   sensor_trigger_count += 1;
 
-  // because we use Instant::now, the real time difference needs to be multiply by counts to
-  // reflect real motion time period time
+  // Calculate the real-time difference using the sensor_trigger_count
   time_difference = config.refresh_rate_milisecs * sensor_trigger_count;
-  sprintf(buff, "motion_detected_count: %d sensor_trigger_count: %d time_difference: %ld", motion_detected_count, sensor_trigger_count, time_difference );
-  if (SerialVerbose)   
-   Serial.println(buff);
-   
+  sprintf(buff, "motion_detected_count: %d sensor_trigger_count: %d time_difference: %ld", motion_detected_count, sensor_trigger_count, time_difference);
+  if (SerialVerbose)
+    Serial.println(buff);
+
   if (time_difference > config.motion_time_period_milisecs)
   {
-      // This is a new detection period - reset the counters
-      sprintf(buff, "Motion Time elapsed. Resetting - sensor_trigger_count %d time_difference: %ld at %ld", sensor_trigger_count, time_difference, millis() );  
-      if (SerialVerbose) 
-        Serial.println(buff);  
-        
-      sensor_trigger_count = 1;
-      motion_detected_count = 0;
+    // This is a new detection period - reset the counters
+    sprintf(buff, "Motion Time elapsed. Resetting - sensor_trigger_count %d time_difference: %ld at %ld", sensor_trigger_count, time_difference, millis());
+    if (SerialVerbose)
+      Serial.println(buff);
+
+    sensor_trigger_count = 1;
+    motion_detected_count = 0;
   }
 
-  // If minimal triggering number within motion time period is reached for motion_detected_count, then we got valid detection.
+  // If minimal triggering number within motion time period is reached for sensor_trigger_count, then check for a valid detection.
   if (sensor_trigger_count >= config.minimal_triggering_number)
   {
-        // Minimal triggering number is reached for sensor checking. Let's check if we also had a  minimal_triggering_number for motion_detected_count 
-        if(motion_detected_count >= config.minimal_triggering_number)
-        {
-          // Minimal triggering number is reached for  motion_detected_count - WE HAVE a VALID detection within minimal_triggering_number and motion_time_period_milisecs
-          last_ValidDetection_time = millis();
-          
-          sprintf(buff, "Detection happened: sensor: %s, sensor_trigger_count: %d", config.name, sensor_trigger_count);
-          // Serial.println(buff);  
+    // Check if we also had a minimal triggering number for motion_detected_count
+    if (motion_detected_count >= config.minimal_triggering_number)
+    {
+      // Valid detection within minimal_triggering_number and motion_time_period_milisecs
+      last_ValidDetection_time = millis();
 
-          Set_JsonValidDetectionData();
-          
-          if (SerialVerbose) 
-          {
-            Serial.print("Detection at ");
-            Serial.println(last_ValidDetection_time);
-          }
-          is_OK = true; // sera remis à false par la fonction qui va utiliser le résultat
-        }
-        else
-        {
-          if(motion_detected_count != 0)
-          {
-            sprintf(buff, "**Rejected motion**: sensor: %s, motion_detected_count: %d sensor_trigger_count: %d during %d msec", config.name, motion_detected_count, sensor_trigger_count, config.motion_time_period_milisecs );                      
-            if (Logger) 
-              (*Logger)(buff, true);
-          }
-        }
-        // Reset the counters
-        sensor_trigger_count = 0;
-        motion_detected_count = 0;
+      sprintf(buff, "Detection happened: sensor: %s, sensor_trigger_count: %d", config.name, sensor_trigger_count);
+      // Serial.println(buff);
+
+      Set_JsonValidDetectionData();
+
+      if (SerialVerbose)
+      {
+        Serial.print("Detection at ");
+        Serial.println(last_ValidDetection_time);
+      }
+
+      is_OK = true; // Will be reset to false by the function using the result
+    }
+    else
+    {
+      // Rejected motion due to insufficient motion_detected_count
+      if (motion_detected_count != 0)
+      {
+        sprintf(buff, "**Rejected motion**: sensor: %s, motion_detected_count: %d sensor_trigger_count: %d during %d msec", config.name, motion_detected_count, sensor_trigger_count, config.motion_time_period_milisecs);
+        if (Logger)
+          (*Logger)(buff, true);
+      }
+    }
+
+    // Reset the counters
+    sensor_trigger_count = 0;
+    motion_detected_count = 0;
   }
-  
+
   // Update the last check time
   last_check_time = millis();
 }
