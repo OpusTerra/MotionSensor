@@ -10,7 +10,8 @@ HC-SR501 PIR is very cheap and widely available an infrared motion sensor and it
 
 However, because it's very cheap, it can detects "noise" from time to time, which means detection happens when there are no real motion within it's detection range - this is a false positive detection.
 
-To eliminate this problem I have created simple library which allows to initialize this sensor with various parameters that they changes it's detection characteristic. The library, based on sensor configuration, can "ignore" these false detections and help make this sensors very reliable.
+I was searching for a library that does the job and found nothing except something very interesting that was written in RUST language. (refer to https://github.com/mateusz-szczyrzyca/pir-motion-sensor/). So I try my best to port this RUST code to Arduino C++ and here it is. As the operation is similar and the configuration the same, I have duplicated here most of the Readme.md file for your convenience. 
+
 
 &nbsp;
 
@@ -69,7 +70,11 @@ Please see example in `examples/` directory
 
 &nbsp;
 
+## Installation 
+
+Simply download ZIP file and extract it in the Arduino library folder.
+
 &nbsp;
 ## TODO
 
-Soon.
+Not yet ...
