@@ -100,6 +100,7 @@ bool MotionSensor::try_recv(void)
     return false;  
 }
 
+// Function to be called regularly in your loop code to check if we have a PIR valid detection
 bool MotionSensor::ValidDetection(void)
 {
   if(is_OK)
@@ -111,7 +112,7 @@ bool MotionSensor::ValidDetection(void)
     return false;   
 }
 
-// The most important chunk of code !
+// The most important chunk of code to be called in you arduino loop!
 void MotionSensor::loop(void)
 {
   char buff[250]; // Buffer for storing log messages
@@ -186,7 +187,7 @@ void MotionSensor::loop(void)
         Serial.println(last_ValidDetection_time);
       }
 
-      is_OK = true; // Will be reset to false by the function using the result
+      is_OK = true; // signal that something serious happened
     }
     else
     {

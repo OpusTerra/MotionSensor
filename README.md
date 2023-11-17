@@ -15,7 +15,7 @@ I was searching for a library that does the job and found nothing except somethi
 
 &nbsp;
 
-## Prerequsities
+## Prerequisites
 
 Use this reference manual for HC-SR501 PIR: https://lastminuteengineers.com/pir-sensor-arduino-tutorial/
 
