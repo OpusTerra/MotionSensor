@@ -1,0 +1,25 @@
+###################################
+# Syntax Coloring Map For NewPing
+###################################
+
+###################################
+# Datatypes (KEYWORD1)
+###################################
+
+MotionSensor	KEYWORD1
+
+###################################
+# Methods and Functions (KEYWORD2)
+###################################
+
+ValidDetection	KEYWORD2
+loop	KEYWORD2
+GetName	KEYWORD2
+GetLastJsonValidDetectionData	KEYWORD2
+Setup	KEYWORD2
+convert_cm	KEYWORD2
+
+###################################
+# Constants (LITERAL1)
+###################################
+
