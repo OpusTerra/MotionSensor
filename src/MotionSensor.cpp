@@ -108,7 +108,7 @@ bool MotionSensor::ValidDetection(void)
 {
   if(is_OK)
   {
-    is_OK = false;
+    is_OK = false;  // On reset à chaque fois qu,on lu l'état  ssi il y a détection
     return true;
   } 
   else
