@@ -187,7 +187,7 @@ void MotionSensor::loop(void)
       {
 		  if (Logger)
 			  (*Logger)(buff, true);
-		  }
+		  
 	  }
 	  
       Set_JsonValidDetectionData();
