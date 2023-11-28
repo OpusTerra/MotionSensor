@@ -181,9 +181,15 @@ void MotionSensor::loop(void)
       // Valid detection within minimal_triggering_number and motion_time_period_milisecs
       last_ValidDetection_time = millis();
 
-      sprintf(buff, "Detection happened: sensor: %s, sensor_trigger_count: %d", config.name, sensor_trigger_count);
-      // Serial.println(buff);
-
+      sprintf(buff, "Detection happened: sensor: %s, sensor_trigger_count: %d at %ld", config.name, sensor_trigger_count, last_ValidDetection_time);
+      
+	  if (SerialVerbose)
+      {
+		  if (Logger)
+			  (*Logger)(buff, true);
+		  }
+	  }
+	  
       Set_JsonValidDetectionData();
 
       if (SerialVerbose)
